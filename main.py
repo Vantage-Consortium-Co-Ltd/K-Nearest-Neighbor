@@ -9,7 +9,13 @@ from pathlib import Path
 
 import numpy as np
 
-from Process.Calculate import calculate_distance, get_k_nearest_neighbors, predict_numeric_label, standardize
+from Process.Calculate import (
+    calculate_distance,
+    choose_k,
+    get_k_nearest_neighbors,
+    predict_numeric_label,
+    standardize,
+)
 from Process.Data import load_config
 from Process.Plot import plot_data, plot_decision_boundary, plot_neighbors
 
@@ -22,6 +28,7 @@ def parse_args(argv=None):
     p.add_argument("--metric", choices=["euclidean", "manhattan"], help="override distance metric")
     p.add_argument("--tie-break", choices=["smallest", "nearest"], help="override vote tie-breaking rule")
     p.add_argument("--standardize", action="store_true", help="z-score features before computing distances")
+    p.add_argument("--tune-k", action="store_true", help="pick k by leave-one-out cross-validation")
     p.add_argument("--no-plot", action="store_true", help="skip saving PNG plots")
     return p.parse_args(argv)
 
@@ -38,6 +45,12 @@ def run(argv=None):
     scale = args.standardize or cfg["standardize"]
     # ระยะคำนวณบนพิกัดที่ scale แล้ว (ถ้าเปิด) แต่แสดงผล/กราฟด้วยพิกัดเดิม
     fx, fy, qx, qy = standardize(data.x, data.y, px, py) if scale else (data.x, data.y, px, py)
+
+    if args.tune_k:
+        k, scores = choose_k(fx, fy, data.label, metric=metric, tie_break=tie_break)
+        print("LOOCV accuracy by k:")
+        for kk, acc in scores.items():
+            print(f"  k={kk:<3} {acc:.3f}{'  <- best' if kk == k else ''}")
 
     dist = calculate_distance(fx, fy, qx, qy, metric)
     idx = get_k_nearest_neighbors(fx, fy, data.label, qx, qy, k, metric)

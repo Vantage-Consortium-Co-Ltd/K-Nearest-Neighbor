@@ -61,3 +61,31 @@ def predict_numeric_label(data_x, data_y, data_label, point_x, point_y, k, metri
         return int(tied[0])
     # idx เรียงจากใกล้ไปไกลอยู่แล้ว -> label แรกที่อยู่ในกลุ่มเสมอคือ label ที่ใกล้ที่สุด
     return int(next(l for l in neighbor_labels if l in tied))
+
+
+def loocv_accuracy(data_x, data_y, data_label, k, metric="euclidean", tie_break="smallest"):
+    """Leave-one-out accuracy: เอาจุดออกทีละจุด ทำนายด้วยจุดที่เหลือ แล้วนับที่ทายถูก"""
+    x = np.asarray(data_x, dtype=float)
+    y = np.asarray(data_y, dtype=float)
+    lab = np.asarray(data_label)
+    n = len(x)
+    if not 1 <= k <= n - 1:
+        raise ValueError(f"for LOOCV k must be in [1, {n - 1}], got {k}")
+    correct = 0
+    for i in range(n):
+        keep = np.arange(n) != i
+        pred = predict_numeric_label(x[keep], y[keep], lab[keep], x[i], y[i], k, metric, tie_break)
+        correct += pred == lab[i]
+    return correct / n
+
+
+def choose_k(data_x, data_y, data_label, ks=None, metric="euclidean", tie_break="smallest"):
+    """ลองหลายค่า k ด้วย LOOCV คืน (k ที่ดีที่สุด, {k: accuracy})
+
+    ค่าเริ่มต้นลอง k คี่ 1, 3, 5, ... (ลดโอกาสเสมอ) ถ้าคะแนนเท่ากันเลือก k ที่เล็กกว่า
+    """
+    n = len(data_x)
+    ks = list(ks) if ks is not None else list(range(1, n, 2))
+    scores = {k: loocv_accuracy(data_x, data_y, data_label, k, metric, tie_break) for k in ks}
+    best = max(scores, key=lambda k: (scores[k], -k))
+    return best, scores
