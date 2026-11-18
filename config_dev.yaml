@@ -1,0 +1,17 @@
+# Config สำหรับ main.py — ชุดข้อมูลเล็ก (ตัวอย่าง 4 จุดแบบเดิม + จุดเพิ่ม) แยกจากข้อมูลใน KNN.ipynb
+data:
+  x:     [1.0, 2.0, 3.0, 6.0, 7.0, 8.0, 2.0, 7.5]
+  y:     [1.0, 1.5, 2.5, 6.0, 7.0, 6.5, 6.5, 2.0]
+  label: [0,   0,   0,   1,   1,   1,   2,   2]
+  label_names:
+    0: "Class A"
+    1: "Class B"
+    2: "Class C"
+  colors: ["red", "blue", "green"]
+  xlabel: "Feature X"
+  ylabel: "Feature Y"
+
+test_point: [4.0, 4.0]
+k: 3
+
+output_dir: output
