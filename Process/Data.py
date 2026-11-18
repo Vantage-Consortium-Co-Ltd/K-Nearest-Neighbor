@@ -56,5 +56,8 @@ def load_config(path):
     if len(cfg["test_point"]) != 2:
         raise ValueError("test_point must be [x, y]")
 
+    cfg.setdefault("metric", "euclidean")
+    if cfg["metric"] not in ("euclidean", "manhattan"):
+        raise ValueError(f"metric must be 'euclidean' or 'manhattan', got {cfg['metric']!r}")
     cfg.setdefault("output_dir", "output")
     return cfg, data
