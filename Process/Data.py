@@ -62,5 +62,8 @@ def load_config(path):
     cfg.setdefault("tie_break", "smallest")
     if cfg["tie_break"] not in ("smallest", "nearest"):
         raise ValueError(f"tie_break must be 'smallest' or 'nearest', got {cfg['tie_break']!r}")
+    cfg.setdefault("standardize", False)
+    if not isinstance(cfg["standardize"], bool):
+        raise ValueError(f"standardize must be true/false, got {cfg['standardize']!r}")
     cfg.setdefault("output_dir", "output")
     return cfg, data

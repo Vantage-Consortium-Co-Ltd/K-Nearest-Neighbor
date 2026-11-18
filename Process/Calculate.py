@@ -6,6 +6,21 @@ METRICS = ("euclidean", "manhattan")
 TIE_BREAKS = ("smallest", "nearest")
 
 
+def standardize(data_x, data_y, point_x=None, point_y=None):
+    """z-score แต่ละ feature ด้วย mean/std ของ training data (ใช้กับจุดทดสอบด้วยค่าเดียวกัน)
+
+    กันไม่ให้ feature ที่ช่วงตัวเลขกว้างกว่าครอบงำระยะทาง feature ที่ค่าคงที่ (std = 0) จะถูกตั้งเป็น 0
+    คืน (x_scaled, y_scaled, point_x_scaled, point_y_scaled)
+    """
+    x = np.asarray(data_x, dtype=float)
+    y = np.asarray(data_y, dtype=float)
+    mx, my = x.mean(), y.mean()
+    sx, sy = x.std() or 1.0, y.std() or 1.0
+    px = None if point_x is None else (point_x - mx) / sx
+    py = None if point_y is None else (point_y - my) / sy
+    return (x - mx) / sx, (y - my) / sy, px, py
+
+
 def calculate_distance(data_x, data_y, point_x, point_y, metric="euclidean"):
     """ระยะจาก (point_x, point_y) ไปยังทุกจุดใน training data
 
