@@ -14,5 +14,6 @@ data:
 test_point: [4.0, 4.0]
 k: 3
 metric: euclidean   # euclidean | manhattan
+tie_break: smallest # smallest (เหมือน notebook) | nearest (label ที่มีเพื่อนบ้านใกล้สุด)
 
 output_dir: output

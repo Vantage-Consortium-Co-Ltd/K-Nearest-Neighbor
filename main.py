@@ -20,6 +20,7 @@ def parse_args(argv=None):
     p.add_argument("--k", type=int, help="override k from config")
     p.add_argument("--point", type=float, nargs=2, metavar=("X", "Y"), help="override test_point")
     p.add_argument("--metric", choices=["euclidean", "manhattan"], help="override distance metric")
+    p.add_argument("--tie-break", choices=["smallest", "nearest"], help="override vote tie-breaking rule")
     p.add_argument("--no-plot", action="store_true", help="skip saving PNG plots")
     return p.parse_args(argv)
 
@@ -32,10 +33,11 @@ def run(argv=None):
         raise SystemExit(f"k must be in [1, {len(data)}], got {k}")
     px, py = args.point if args.point else cfg["test_point"]
     metric = args.metric or cfg["metric"]
+    tie_break = args.tie_break or cfg["tie_break"]
 
     dist = calculate_distance(data.x, data.y, px, py, metric)
     idx = get_k_nearest_neighbors(data.x, data.y, data.label, px, py, k, metric)
-    pred = predict_numeric_label(data.x, data.y, data.label, px, py, k, metric)
+    pred = predict_numeric_label(data.x, data.y, data.label, px, py, k, metric, tie_break)
 
     print(f"{len(data)} training points, test point = ({px}, {py}), k = {k}, metric = {metric}")
     print("nearest neighbors:")

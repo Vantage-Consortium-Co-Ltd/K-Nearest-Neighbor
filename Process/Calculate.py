@@ -3,6 +3,7 @@
 import numpy as np
 
 METRICS = ("euclidean", "manhattan")
+TIE_BREAKS = ("smallest", "nearest")
 
 
 def calculate_distance(data_x, data_y, point_x, point_y, metric="euclidean"):
@@ -27,8 +28,21 @@ def get_k_nearest_neighbors(data_x, data_y, data_label, point_x, point_y, k, met
     return np.argsort(distances, kind="stable")[:k]
 
 
-def predict_numeric_label(data_x, data_y, data_label, point_x, point_y, k, metric="euclidean"):
-    """label ที่ชนะ majority vote ในกลุ่ม k เพื่อนบ้าน (เสมอ -> label เลขน้อยสุด)"""
+def predict_numeric_label(data_x, data_y, data_label, point_x, point_y, k, metric="euclidean",
+                          tie_break="smallest"):
+    """label ที่ชนะ majority vote ในกลุ่ม k เพื่อนบ้าน
+
+    ถ้าคะแนนเสมอ:
+      - "smallest" (ค่าเริ่มต้น เหมือนใน notebook) -> label เลขน้อยสุด
+      - "nearest" -> label ที่มีเพื่อนบ้านอยู่ใกล้จุดทดสอบที่สุด (ไม่ขึ้นกับการตั้งเลข label)
+    """
+    if tie_break not in TIE_BREAKS:
+        raise ValueError(f"unknown tie_break {tie_break!r}, choose from {TIE_BREAKS}")
     idx = get_k_nearest_neighbors(data_x, data_y, data_label, point_x, point_y, k, metric)
-    labels, counts = np.unique(np.asarray(data_label)[idx], return_counts=True)
-    return int(labels[np.argmax(counts)])
+    neighbor_labels = np.asarray(data_label)[idx]
+    labels, counts = np.unique(neighbor_labels, return_counts=True)
+    tied = labels[counts == counts.max()]
+    if len(tied) == 1 or tie_break == "smallest":
+        return int(tied[0])
+    # idx เรียงจากใกล้ไปไกลอยู่แล้ว -> label แรกที่อยู่ในกลุ่มเสมอคือ label ที่ใกล้ที่สุด
+    return int(next(l for l in neighbor_labels if l in tied))

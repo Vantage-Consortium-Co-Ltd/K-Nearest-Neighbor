@@ -59,5 +59,8 @@ def load_config(path):
     cfg.setdefault("metric", "euclidean")
     if cfg["metric"] not in ("euclidean", "manhattan"):
         raise ValueError(f"metric must be 'euclidean' or 'manhattan', got {cfg['metric']!r}")
+    cfg.setdefault("tie_break", "smallest")
+    if cfg["tie_break"] not in ("smallest", "nearest"):
+        raise ValueError(f"tie_break must be 'smallest' or 'nearest', got {cfg['tie_break']!r}")
     cfg.setdefault("output_dir", "output")
     return cfg, data
